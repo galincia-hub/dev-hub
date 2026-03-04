@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CI Results — 작업 결과물 뷰어</title>
+<style>
+:root{--bg:#0d1117;--s:#161b22;--b:#21262d;--t:#e6edf3;--m:#7d8590;--blue:#58a6ff;--orange:#f0883e;--green:#3fb950;--red:#f85149;--purple:#bc8cff;--yellow:#e3b341;--navy:#1a2744}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:32px 20px}
+a{text-decoration:none;color:inherit}
+
+.header{max-width:1200px;margin:0 auto 8px;display:flex;justify-content:space-between;align-items:center}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--navy),#2a4080);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid #2a4080;flex-shrink:0}
+.title{font-size:17px;font-weight:700}
+.subtitle{font-size:11px;color:var(--m);margin-top:2px}
+.back-btn{font-size:11px;color:var(--blue);border:1px solid var(--b);padding:5px 12px;border-radius:6px;transition:all .15s;white-space:nowrap}
+.back-btn:hover{background:var(--b);color:var(--t)}
+
+.breadcrumb{max-width:1200px;margin:0 auto 28px;font-size:11px;color:var(--m)}
+.breadcrumb span{color:var(--blue)}
+
+/* 탭 네비 */
+.tabs{max-width:1200px;margin:0 auto 24px;display:flex;gap:4px;border-bottom:1px solid var(--b);padding-bottom:0}
+.tab{font-size:12px;padding:8px 16px;border-radius:6px 6px 0 0;cursor:pointer;color:var(--m);border:1px solid transparent;border-bottom:none;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--t);background:var(--s)}
+.tab.active{color:var(--t);background:var(--s);border-color:var(--b);border-bottom-color:var(--s)}
+.tab-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* 탭 콘텐츠 */
+.tab-content{max-width:1200px;margin:0 auto;display:none}
+.tab-content.active{display:block}
+
+/* 섹션 */
+.section{margin-bottom:36px}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--m);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:"";flex:1;height:1px;background:var(--b)}
+
+/* 결과물 그리드 */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.result-grid.wide{grid-template-columns:repeat(auto-fill,minmax(480px,1fr))}
+
+/* 결과물 카드 */
+.rcard{background:var(--s);border:1px solid var(--b);border-radius:10px;overflow:hidden;transition:all .15s;position:relative}
+.rcard::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--cc,#333);opacity:0;transition:opacity .15s}
+.rcard:hover{border-color:var(--cc,#444);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.rcard:hover::before{opacity:1}
+
+.rcard-preview{height:120px;background:var(--cb,#1e2530);display:flex;align-items:center;justify-content:center;font-size:36px;border-bottom:1px solid var(--b);position:relative;overflow:hidden}
+.rcard-preview iframe{width:100%;height:100%;border:none;pointer-events:none;transform:scale(0.5);transform-origin:top left;width:200%;height:200%}
+.preview-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);opacity:0;transition:opacity .2s;display:flex;align-items:center;justify-content:center}
+.rcard:hover .preview-overlay{opacity:1}
+.preview-btn{font-size:11px;background:var(--blue);color:#fff;padding:6px 14px;border-radius:6px;font-weight:600}
+
+.rcard-body{padding:14px}
+.rcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.rcard-name{font-size:13px;font-weight:600}
+.rcard-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.badge{font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid var(--b);color:var(--m);white-space:nowrap}
+.badge-live{border-color:rgba(63,185,80,.4);color:var(--green);background:rgba(63,185,80,.08)}
+.badge-local{border-color:rgba(240,136,62,.4);color:var(--orange);background:rgba(240,136,62,.08)}
+.badge-file{border-color:rgba(88,166,255,.4);color:var(--blue);background:rgba(88,166,255,.08)}
+.badge-wip{border-color:rgba(227,179,65,.4);color:var(--yellow);background:rgba(227,179,65,.08)}
+
+.rcard-path{font-size:10px;color:var(--m);margin-bottom:6px;font-family:monospace;word-break:break-all}
+.rcard-desc{font-size:12px;color:var(--m);line-height:1.6;margin-bottom:8px}
+.rcard-note{font-size:11px;color:var(--yellow);padding:5px 8px;background:rgba(227,179,65,.07);border-radius:4px;border-left:2px solid var(--yellow);line-height:1.5;margin-bottom:8px}
+
+.rcard-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.rlink{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--b);color:var(--m);transition:all .12s;cursor:pointer}
+.rlink:hover{background:var(--b);color:var(--t)}
+.rlink.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.rlink.primary:hover{opacity:.85}
+
+/* 스탯 배지 */
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.stat{font-size:11px;color:var(--m);display:flex;align-items:center;gap:4px}
+.stat strong{color:var(--t);font-weight:600}
+
+/* 스크린샷 미리보기 */
+.screenshot{width:100%;height:160px;object-fit:cover;object-position:top;border-bottom:1px solid var(--b);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--m);font-size:12px}
+
+/* 파일 트리 */
+.file-tree{background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:12px 14px;font-family:monospace;font-size:11px;color:var(--m);line-height:2;margin-top:8px}
+.ft-dir{color:var(--blue)}
+.ft-file{color:var(--t)}
+.ft-note{color:var(--m);font-size:10px}
+
+/* 타임라인 */
+.timeline{border-left:2px solid var(--b);padding-left:20px;margin-left:8px}
+.tl-item{position:relative;margin-bottom:20px}
+.tl-item::before{content:"";position:absolute;left:-25px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--cc,var(--b));border:2px solid var(--bg)}
+.tl-date{font-size:10px;color:var(--m);font-family:monospace;margin-bottom:3px}
+.tl-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.tl-desc{font-size:12px;color:var(--m);line-height:1.6}
+.tl-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+
+/* 2컬럼 레이아웃 */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+
+.info-box{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px}
+.ib-title{font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.ib-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--b);align-items:flex-start}
+.ib-row:last-child{border-bottom:none}
+.ib-key{font-size:11px;color:var(--m);min-width:100px;flex-shrink:0}
+.ib-val{font-size:11px;color:var(--t);font-family:monospace;word-break:break-all}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">&#128196;</div>
+    <div>
+      <div class="title">CI Results</div>
+      <div class="subtitle">작업 결과물 뷰어 &mdash; 크루즈인터내셔널</div>
+    </div>
+  </div>
+  <a href="dev-hub.html" class="back-btn">&#8592; Dev Hub</a>
+</div>
+<div class="breadcrumb">
+  <a href="dev-hub.html" style="color:var(--m)">Dev Hub</a> &nbsp;/&nbsp; <span>Results</span>
+</div>
+
+<!-- 탭 -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('all')"><span class="tab-dot" style="background:var(--t)"></span>전체</div>
+  <div class="tab" onclick="showTab('web')"><span class="tab-dot" style="background:var(--green)"></span>웹 서비스</div>
+  <div class="tab" onclick="showTab('cruisemd')"><span class="tab-dot" style="background:var(--purple)"></span>CruiseMD</div>
+  <div class="tab" onclick="showTab('kms')"><span class="tab-dot" style="background:var(--orange)"></span>CruiseKMS</div>
+  <div class="tab" onclick="showTab('studio')"><span class="tab-dot" style="background:var(--blue)"></span>CruiseStudio</div>
+  <div class="tab" onclick="showTab('arch')"><span class="tab-dot" style="background:var(--m)"></span>아키텍처</div>
+</div>
+
+<!-- ===== 전체 / 웹 서비스 ===== -->
+<div id="tab-all" class="tab-content active">
+<div id="tab-web-inline">
+
+<div class="section">
+<div class="section-title">&#x1F7E2; 배포된 웹 서비스</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:var(--green);--cb:#0f2a1a">
+    <div class="rcard-preview" style="background:#0f2a1a;font-size:14px;flex-direction:column;gap:8px">
+      <div style="font-size:32px">&#127760;</div>
+      <div style="font-size:11px;color:var(--green)">LIVE</div>
+    </div>
+    <div class="preview-overlay"><a href="https://radiant-croissant-b5e264.netlify.app" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">cruise.co.kr (개발버전)</div>
+        <div class="rcard-badges"><span class="badge badge-live">&#x25CF; LIVE</span></div>
+      </div>
+      <div class="rcard-path">radiant-croissant-b5e264.netlify.app</div>
+      <div class="rcard-desc">Jekyll 정적사이트 · Netlify 자동배포<br>홈 / 선사소개 / 상품 / 블로그 / 상담문의</div>
+      <div class="rcard-note">&#x2139; git push 후 25초 자동 반영 · 실제 도메인 연결 대기 중</div>
+      <div class="stat-row">
+        <div class="stat">페이지 <strong>15개</strong></div>
+        <div class="stat">파일 <strong>22개</strong></div>
+        <div class="stat">빌드 <strong>25초</strong></div>
+      </div>
+      <div class="rcard-links">
+        <a href="https://radiant-croissant-b5e264.netlify.app" target="_blank" class="rlink primary">&#x1F517; 사이트 열기</a>
+        <a href="https://app.netlify.com" target="_blank" class="rlink">Netlify 대시보드</a>
+        <a href="https://github.com/galincia-hub/cruise-website" target="_blank" class="rlink">GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:#8b949e;--cb:#1a1e26">
+    <div class="rcard-preview" style="background:#1a1e26;font-size:32px">&#128025;</div>
+    <div class="preview-overlay"><a href="https://github.com/galincia-hub/cruise-website" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">GitHub · cruise-website</div>
+        <div class="rcard-badges"><span class="badge">Public</span></div>
+      </div>
+      <div class="rcard-path">github.com/galincia-hub/cruise-website</div>
+      <div class="rcard-desc">Jekyll 소스코드 저장소 · 커밋 기록 보존<br>Netlify 연동 → push 감지 자동 빌드</div>
+      <div class="rcard-note">&#x26A0; 민감 데이터(API키, 고객정보) 업로드 금지</div>
+      <div class="stat-row">
+        <div class="stat">커밋 <strong>3개</strong></div>
+        <div class="stat">브랜치 <strong>main</strong></div>
+      </div>
+      <div class="rcard-links">
+        <a href="https://github.com/galincia-hub/cruise-website" target="_blank" class="rlink primary">GitHub 열기</a>
+        <a href="https://github.com/galincia-hub/cruise-website/commits/main" target="_blank" class="rlink">커밋 기록</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">&#x1F7E0; 로컬 서비스</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:var(--orange);--cb:#2a1e0f">
+    <div class="rcard-preview" style="background:#2a1e0f;font-size:32px">&#128230;</div>
+    <div class="preview-overlay"><a href="http://localhost:8501" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">CruiseMD Streamlit 대시보드</div>
+        <div class="rcard-badges"><span class="badge badge-local">로컬</span></div>
+      </div>
+      <div class="rcard-path">localhost:8501 &nbsp;|&nbsp; C:\Vs\CruiseMD\app.py</div>
+      <div class="rcard-desc">Python Streamlit · 5개 탭 구성<br>대시보드 / 항차인덱스 / 프로모션관리 / 견적서생성 / 설정</div>
+      <div class="rcard-note">&#x26A0; 실행: cd C:\Vs\CruiseMD &amp;&amp; python -m streamlit run app.py</div>
+      <div class="stat-row">
+        <div class="stat">상품 <strong>13개</strong></div>
+        <div class="stat">항차 <strong>54개</strong></div>
+        <div class="stat">스켈레톤 <strong>11개</strong></div>
+      </div>
+      <div class="rcard-links">
+        <a href="http://localhost:8501" target="_blank" class="rlink primary">&#x1F517; 대시보드</a>
+        <a href="http://localhost:8501/?tab=1" target="_blank" class="rlink">항차 인덱스</a>
+        <a href="http://localhost:8501/?tab=3" target="_blank" class="rlink">견적서 생성</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--blue);--cb:#0f1e2a">
+    <div class="rcard-preview" style="background:#0f1e2a;font-size:32px">&#127959;</div>
+    <div class="preview-overlay"><a href="http://127.0.0.1:4000" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">Jekyll 로컬 미리보기</div>
+        <div class="rcard-badges"><span class="badge badge-local">로컬</span></div>
+      </div>
+      <div class="rcard-path">127.0.0.1:4000 &nbsp;|&nbsp; C:\Vs\cruise-site</div>
+      <div class="rcard-desc">cruise.co.kr 로컬 개발서버<br>파일 수정 시 자동 재빌드 (저장만 하면 됨)</div>
+      <div class="rcard-note">&#x26A0; 실행: cd C:\Vs\cruise-site &amp;&amp; bundle exec jekyll serve</div>
+      <div class="rcard-links">
+        <a href="http://127.0.0.1:4000" target="_blank" class="rlink primary">&#x1F517; 로컬 사이트</a>
+        <a href="http://127.0.0.1:4000/cruiselines" target="_blank" class="rlink">선사 목록</a>
+        <a href="http://127.0.0.1:4000/blog" target="_blank" class="rlink">블로그</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- CruiseMD inline -->
+<div class="section">
+<div class="section-title">&#x1F4E6; CruiseMD 결과물</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:var(--purple);--cb:#1e1428">
+    <div class="rcard-preview" style="background:#1e1428;font-size:32px">&#127823;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseMD/product_cards.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">상품 카드 뷰어</div>
+        <div class="rcard-badges"><span class="badge badge-file">파일</span></div>
+      </div>
+      <div class="rcard-path">C:\Vs\CruiseMD\product_cards.html</div>
+      <div class="rcard-desc">24개 추천 상품 카드 뷰 + 494개 항차 인덱스<br>프로모션 배지: 초록=진행중 / 회색=종료</div>
+      <div class="rcard-note">&#x2139; build_cards.py 실행 시 자동 재생성</div>
+      <div class="stat-row">
+        <div class="stat">상품 <strong>24개</strong></div>
+        <div class="stat">항차 <strong>494개</strong></div>
+        <div class="stat">활성 프로모 <strong>1개</strong></div>
+      </div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseMD/product_cards.html" target="_blank" class="rlink primary">&#x1F517; 열기</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--yellow);--cb:#2a2010">
+    <div class="rcard-preview" style="background:#2a2010;font-size:32px">&#128203;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseMD/quote_sample.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">견적서 HTML 샘플</div>
+        <div class="rcard-badges"><span class="badge badge-wip">개발중</span></div>
+      </div>
+      <div class="rcard-path">C:\Vs\CruiseMD\quote_sample.html</div>
+      <div class="rcard-desc">고객 발송용 HTML 견적서 템플릿<br>이메일 / 카카오톡으로 직접 발송 가능한 형식</div>
+      <div class="rcard-note">&#x26A0; Streamlit 견적서 생성 탭과 연동 예정</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseMD/quote_sample.html" target="_blank" class="rlink primary">&#x1F517; 열기</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--blue);--cb:#0f1e2a">
+    <div class="rcard-preview" style="background:#0f1e2a;font-size:32px">&#128196;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseMD/products/" target="_blank" class="preview-btn">&#x1F4C1; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top">
+        <div class="rcard-name">상품 JSON 데이터</div>
+        <div class="rcard-badges"><span class="badge badge-file">파일</span></div>
+      </div>
+      <div class="rcard-path">C:\Vs\CruiseMD\products\</div>
+      <div class="rcard-desc">RSSC 추천 상품 24개 JSON 파일<br>완성 2개 · 스켈레톤 11개 · 후보 11개</div>
+      <div class="rcard-note">&#x2139; Upgrade Your Horizon 프로모션 반영됨 (마감 2026-02-28)</div>
+      <div class="stat-row">
+        <div class="stat">완성 <strong style="color:var(--green)">2개</strong></div>
+        <div class="stat">스켈레톤 <strong style="color:var(--yellow)">11개</strong></div>
+        <div class="stat">후보 <strong style="color:var(--m)">11개</strong></div>
+      </div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseMD/products/" target="_blank" class="rlink primary">&#x1F4C1; 폴더 열기</a>
+        <a href="file:///C:/Vs/CruiseMD/sailings_index.json" target="_blank" class="rlink">sailings_index.json</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 사이트 목업 -->
+<div class="section">
+<div class="section-title">&#x1F3A8; cruise.co.kr 디자인 목업 (React)</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:var(--green);--cb:#0f2a1a">
+    <div class="rcard-preview" style="background:#0f2a1a;font-size:32px">&#127968;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/cruise-site/mockups/homepage.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">홈페이지 목업</div><div class="rcard-badges"><span class="badge badge-file">React</span></div></div>
+      <div class="rcard-path">C:\Vs\cruise-site\mockups\homepage.html</div>
+      <div class="rcard-desc">메인 히어로 / 선사 카드 7개 / 추천항해 / 상담문의 섹션</div>
+      <div class="rcard-links"><a href="file:///C:/Vs/cruise-site/mockups/homepage.html" target="_blank" class="rlink primary">&#x1F517; 열기</a></div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--green);--cb:#0f2a1a">
+    <div class="rcard-preview" style="background:#0f2a1a;font-size:32px">&#9961;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/cruise-site/mockups/cruiseline.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">선사 페이지 목업</div><div class="rcard-badges"><span class="badge badge-file">React</span></div></div>
+      <div class="rcard-path">C:\Vs\cruise-site\mockups\cruiseline.html</div>
+      <div class="rcard-desc">리젠트 세븐시즈 기준 · 선사 개요 / 선박 / 상품 탭</div>
+      <div class="rcard-links"><a href="file:///C:/Vs/cruise-site/mockups/cruiseline.html" target="_blank" class="rlink primary">&#x1F517; 열기</a></div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--green);--cb:#0f2a1a">
+    <div class="rcard-preview" style="background:#0f2a1a;font-size:32px">&#128240;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/cruise-site/mockups/product.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">상품 상세 목업</div><div class="rcard-badges"><span class="badge badge-file">React</span></div></div>
+      <div class="rcard-path">C:\Vs\cruise-site\mockups\product.html</div>
+      <div class="rcard-desc">항차 상세 / 일정 / 객실 / 포함내역 / 견적문의</div>
+      <div class="rcard-links"><a href="file:///C:/Vs/cruise-site/mockups/product.html" target="_blank" class="rlink primary">&#x1F517; 열기</a></div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--green);--cb:#0f2a1a">
+    <div class="rcard-preview" style="background:#0f2a1a;font-size:32px">&#x270F;&#xFE0F;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/cruise-site/mockups/blog.html" target="_blank" class="preview-btn">&#x1F517; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">블로그 목업</div><div class="rcard-badges"><span class="badge badge-file">React</span></div></div>
+      <div class="rcard-path">C:\Vs\cruise-site\mockups\blog.html</div>
+      <div class="rcard-desc">블로그 메인 + 개별 글 페이지 · 카테고리 필터</div>
+      <div class="rcard-links"><a href="file:///C:/Vs/cruise-site/mockups/blog.html" target="_blank" class="rlink primary">&#x1F517; 열기</a></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- KMS inline -->
+<div class="section">
+<div class="section-title">&#x1F5C4; CruiseKMS 지식 문서</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:#f78166;--cb:#2a150f">
+    <div class="rcard-preview" style="background:#2a150f;font-size:32px">&#9961;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseDB/cruiselines/regent/" target="_blank" class="preview-btn">&#x1F4C1; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">리젠트 세븐시즈</div><div class="rcard-badges"><span class="badge badge-file">KMS</span></div></div>
+      <div class="rcard-path">C:\Vs\CruiseDB\cruiselines\regent\</div>
+      <div class="rcard-desc">overview / ships / cabins / dining / tips 문서<br>Grandeur·Mariner·Navigator·Splendor·Voyager</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseDB/cruiselines/regent/" target="_blank" class="rlink primary">&#x1F4C1; 폴더</a>
+        <a href="file:///C:/Vs/CruiseDB/cruiselines/regent/overview.md" target="_blank" class="rlink">overview.md</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--orange);--cb:#2a1e0f">
+    <div class="rcard-preview" style="background:#2a1e0f;font-size:32px">&#x1F6F3;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseDB/cruiselines/oceania/" target="_blank" class="preview-btn">&#x1F4C1; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">오세아니아 크루즈</div><div class="rcard-badges"><span class="badge badge-file">KMS</span><span class="badge">12개 문서</span></div></div>
+      <div class="rcard-path">C:\Vs\CruiseDB\cruiselines\oceania\</div>
+      <div class="rcard-desc">객실비교 / OLife Choice / Allura선박 / 다이닝 4개<br>R-Class 4척 / 리젠트·실버시와 3-way 비교</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseDB/cruiselines/oceania/" target="_blank" class="rlink primary">&#x1F4C1; 폴더</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--purple);--cb:#1e1428">
+    <div class="rcard-preview" style="background:#1e1428;font-size:32px">&#x2693;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseDB/cruiselines/fourseasons/" target="_blank" class="preview-btn">&#x1F4C1; 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">포시즌스 요트</div><div class="rcard-badges"><span class="badge badge-file">KMS</span><span class="badge">6개 문서</span></div></div>
+      <div class="rcard-path">C:\Vs\CruiseDB\cruiselines\fourseasons\</div>
+      <div class="rcard-desc">공식사이트 + 매거진 크로스리서치 완료<br>overview / ship / cabins / dining / tips</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseDB/cruiselines/fourseasons/" target="_blank" class="rlink primary">&#x1F4C1; 폴더</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--blue);--cb:#0f1e2a">
+    <div class="rcard-preview" style="background:#0f1e2a;font-size:32px">&#128452;</div>
+    <div class="preview-overlay"><a href="file:///C:/Vs/CruiseDB/" target="_blank" class="preview-btn">&#x1F4C1; 전체 열기</a></div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">전체 KMS 폴더</div><div class="rcard-badges"><span class="badge badge-file">KMS</span></div></div>
+      <div class="rcard-path">C:\Vs\CruiseDB\</div>
+      <div class="rcard-desc">cruiselines / destinations / consulting / training<br>MCP 서버 3개 툴: cruise_search · compare · port_info</div>
+      <div class="rcard-note">&#x26A0; 샘플 데이터 혼재 · 실제 데이터 교체 진행 중</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/CruiseDB/" target="_blank" class="rlink primary">&#x1F4C1; 전체 폴더</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- 에이전트 -->
+<div class="section">
+<div class="section-title">&#x1F916; CruiseStudio 에이전트</div>
+<div class="result-grid">
+
+  <div class="rcard" style="--cc:var(--blue);--cb:#0f1e2a">
+    <div class="rcard-preview" style="background:#0f1e2a;font-size:32px">&#x270F;&#xFE0F;</div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">blog 에이전트 v1</div><div class="rcard-badges"><span class="badge badge-live">운영중</span></div></div>
+      <div class="rcard-path">C:\Vs\blog\</div>
+      <div class="rcard-desc">유튜브 URL → 자막추출 → 블로그 글 자동생성<br>Writer → Reviewer → Style → SEO 4단계 파이프라인<br>KMS 자동저장 연동 완료</div>
+      <div class="rcard-note">&#x2139; Jane 스타일 기본 적용 · 번역투 제거 · 한국식 단위변환</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/blog/" target="_blank" class="rlink primary">&#x1F4C1; 폴더</a>
+        <a href="file:///C:/Vs/blog/CLAUDE.md" target="_blank" class="rlink">CLAUDE.md</a>
+        <a href="file:///C:/Vs/blog/.mcp.json" target="_blank" class="rlink">.mcp.json</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rcard" style="--cc:var(--blue);--cb:#0f1e2a">
+    <div class="rcard-preview" style="background:#0f1e2a;font-size:32px">&#x270F;&#xFE0F;</div>
+    <div class="rcard-body">
+      <div class="rcard-top"><div class="rcard-name">blog_V2 에이전트</div><div class="rcard-badges"><span class="badge badge-wip">MCP 연동 대기</span></div></div>
+      <div class="rcard-path">C:\Vs\blog_V2\</div>
+      <div class="rcard-desc">릴리스(Rellis) AI 스크립트 붙여넣기 방식<br>자막추출 단계 생략 → 더 빠르고 안정적<br>경로A: URL직접 / 경로B: 스크립트(권장)</div>
+      <div class="rcard-note">&#x26A0; .mcp.json 복사 필요: copy C:\Vs\blog\.mcp.json C:\Vs\blog_V2\.mcp.json</div>
+      <div class="rcard-links">
+        <a href="file:///C:/Vs/blog_V2/" target="_blank" class="rlink primary">&#x1F4C1; 폴더</a>
+        <a href="file:///C:/Vs/blog_V2/CLAUDE.md" target="_blank" class="rlink">CLAUDE.md</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</div><!-- end tab-all -->
+
+<!-- ===== 웹 서비스 탭 ===== -->
+<div id="tab-web" class="tab-content">
+  <div style="padding:40px;text-align:center;color:var(--m)">&#8593; 전체 탭에서 웹 서비스 섹션을 확인하세요</div>
+</div>
+
+<!-- ===== CruiseMD 탭 ===== -->
+<div id="tab-cruisemd" class="tab-content">
+<div class="section">
+<div class="section-title">&#x1F4E6; CruiseMD 상세</div>
+<div class="two-col">
+  <div class="info-box">
+    <div class="ib-title">시스템 현황</div>
+    <div class="ib-row"><span class="ib-key">상태</span><span class="ib-val" style="color:var(--purple)">65% 완성</span></div>
+    <div class="ib-row"><span class="ib-key">등록 상품</span><span class="ib-val">13개 (완성 2 + 스켈레톤 11)</span></div>
+    <div class="ib-row"><span class="ib-key">항차 인덱스</span><span class="ib-val">494개 (sailings_index.json)</span></div>
+    <div class="ib-row"><span class="ib-key">활성 프로모</span><span class="ib-val">Upgrade Your Horizon (종료됨)</span></div>
+    <div class="ib-row"><span class="ib-key">대시보드</span><span class="ib-val">localhost:8501 (Streamlit)</span></div>
+    <div class="ib-row"><span class="ib-key">주요 스크립트</span><span class="ib-val">parse_promotion.py / apply_promo.py / build_cards.py / export_to_jekyll.py</span></div>
+  </div>
+  <div class="info-box">
+    <div class="ib-title">파싱 파이프라인 현황</div>
+    <div class="ib-row"><span class="ib-key">Type A</span><span class="ib-val" style="color:var(--m)">미개발</span></div>
+    <div class="ib-row"><span class="ib-key">Type B</span><span class="ib-val" style="color:var(--green)">✅ Sail Into Savings 완성</span></div>
+    <div class="ib-row"><span class="ib-key">Type C/D</span><span class="ib-val" style="color:var(--red)">❌ 중단 (FIT 실시간 요금)</span></div>
+    <div class="ib-row"><span class="ib-key">중단 이유</span><span class="ib-val">RSSC FIT 구조 → 고정금액 추출 불가 → 면책문구로 대체</span></div>
+    <div class="ib-row"><span class="ib-key">다음 과제</span><span class="ib-val">export_to_jekyll.py 테스트 · 견적서 Streamlit 연동</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ===== KMS 탭 ===== -->
+<div id="tab-kms" class="tab-content">
+<div class="section">
+<div class="section-title">&#x1F5C4; CruiseKMS 문서 현황</div>
+<div class="two-col">
+  <div class="info-box">
+    <div class="ib-title">보유 선사별 문서</div>
+    <div class="ib-row"><span class="ib-key">리젠트(RSSC)</span><span class="ib-val" style="color:var(--green)">overview / 선박5 / cabins / dining / tips</span></div>
+    <div class="ib-row"><span class="ib-key">오세아니아</span><span class="ib-val" style="color:var(--green)">12개 (객실/OLife/Allura/다이닝/R-Class)</span></div>
+    <div class="ib-row"><span class="ib-key">포시즌스</span><span class="ib-val" style="color:var(--green)">6개 (overview~tips)</span></div>
+    <div class="ib-row"><span class="ib-key">크리스탈</span><span class="ib-val" style="color:var(--yellow)">부분 보유</span></div>
+    <div class="ib-row"><span class="ib-key">실버시</span><span class="ib-val" style="color:var(--m)">미개발</span></div>
+    <div class="ib-row"><span class="ib-key">리츠칼튼</span><span class="ib-val" style="color:var(--m)">미개발</span></div>
+  </div>
+  <div class="info-box">
+    <div class="ib-title">MCP 서버 툴</div>
+    <div class="ib-row"><span class="ib-key">cruise_search</span><span class="ib-val">선사/선박/카테고리/지역 검색</span></div>
+    <div class="ib-row"><span class="ib-key">cruise_compare</span><span class="ib-val">선사 비교 (2~4개)</span></div>
+    <div class="ib-row"><span class="ib-key">cruise_port_info</span><span class="ib-val">기항지 정보 (교통/관광/자유여행)</span></div>
+    <div class="ib-row"><span class="ib-key">연동 현황</span><span class="ib-val">blog ✅ / blog_V2 ⏳ / CruiseMD 예정</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ===== Studio 탭 ===== -->
+<div id="tab-studio" class="tab-content">
+<div class="section">
+<div class="section-title">&#x270F;&#xFE0F; CruiseStudio 파이프라인</div>
+<div class="info-box" style="margin-bottom:16px">
+  <div class="ib-title">블로그 생성 파이프라인</div>
+  <div class="ib-row"><span class="ib-key">입력</span><span class="ib-val">유튜브 URL 또는 릴리스 스크립트</span></div>
+  <div class="ib-row"><span class="ib-key">Step 1</span><span class="ib-val">Writer — 초안 작성 (CruiseKMS 참조)</span></div>
+  <div class="ib-row"><span class="ib-key">Step 2</span><span class="ib-val">Reviewer — 팩트체크 · 구조 검토</span></div>
+  <div class="ib-row"><span class="ib-key">Step 3</span><span class="ib-val">Style Editor — Jane 스타일 적용 · 번역투 제거</span></div>
+  <div class="ib-row"><span class="ib-key">Step 4</span><span class="ib-val">SEO — 네이버 최적화 · 태그 생성</span></div>
+  <div class="ib-row"><span class="ib-key">출력</span><span class="ib-val">완성 블로그 글 + KMS 자동저장</span></div>
+  <div class="ib-row"><span class="ib-key">Jane 스타일</span><span class="ib-val">sq ft→평 변환 · 번역투 제거 · 자연스러운 CTA · 독자 참여 유도</span></div>
+</div>
+</div>
+</div>
+
+<!-- ===== 아키텍처 탭 ===== -->
+<div id="tab-arch" class="tab-content">
+<div class="section">
+<div class="section-title">&#x1F3D7; 전체 시스템 아키텍처</div>
+<div class="info-box">
+  <div class="ib-title">폴더 구조</div>
+  <div class="file-tree">
+<span class="ft-dir">C:\Vs\</span>
+├─ <span class="ft-dir">blog\</span>          <span class="ft-note">← 블로그 에이전트 v1 (YouTube URL 방식)</span>
+├─ <span class="ft-dir">blog_V2\</span>       <span class="ft-note">← 블로그 에이전트 v2 (릴리스 스크립트 방식)</span>
+├─ <span class="ft-dir">CruiseMD\</span>      <span class="ft-note">← 상품관리 시스템</span>
+│  ├─ <span class="ft-dir">products\</span>   <span class="ft-note">← 24개 상품 JSON</span>
+│  ├─ <span class="ft-dir">scripts\</span>    <span class="ft-note">← parse/apply/build/export 스크립트</span>
+│  └─ <span class="ft-file">app.py</span>     <span class="ft-note">← Streamlit 대시보드</span>
+├─ <span class="ft-dir">CruiseKMS\</span>     <span class="ft-note">← KMS MCP 서버</span>
+├─ <span class="ft-dir">CruiseDB\</span>      <span class="ft-note">← 지식 문서 (Markdown)</span>
+│  ├─ <span class="ft-dir">cruiselines\</span> <span class="ft-note">← 선사별 문서</span>
+│  └─ <span class="ft-dir">destinations\</span><span class="ft-note">← 기항지별 문서</span>
+├─ <span class="ft-dir">cruise-site\</span>   <span class="ft-note">← Jekyll 홈페이지 소스</span>
+├─ <span class="ft-file">dev-hub.html</span>  <span class="ft-note">← 개발자 허브 (현재 페이지)</span>
+└─ <span class="ft-file">results.html</span>  <span class="ft-note">← 결과물 뷰어 (이 파일)</span>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if(name === 'all') {
+    document.getElementById('tab-all').classList.add('active');
+  } else if(name === 'web') {
+    document.getElementById('tab-web').classList.add('active');
+  } else if(name === 'cruisemd') {
+    document.getElementById('tab-cruisemd').classList.add('active');
+  } else if(name === 'kms') {
+    document.getElementById('tab-kms').classList.add('active');
+  } else if(name === 'studio') {
+    document.getElementById('tab-studio').classList.add('active');
+  } else if(name === 'arch') {
+    document.getElementById('tab-arch').classList.add('active');
+  }
+}
+</script>
+</body>
+</html>
