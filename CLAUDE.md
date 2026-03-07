@@ -12,6 +12,14 @@
    - C:\Vs\dev-hub\results.html
 5. git push → C:\Vs\dev-hub\ (galincia-hub/dev-hub)
 
+## 자동 기록 규칙
+
+모든 작업 완료 시 자동으로:
+1. "작업 완료" 메시지 출력
+2. Notion 작업일지 업데이트
+3. 해당 프로젝트 git commit + push
+4. 사람 확인 기다리지 않고 진행
+
 ## 경로 규칙
 
 - 로컬용: `file:///C:/Vs/...` 형식
