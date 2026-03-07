@@ -36,6 +36,14 @@ cd C:/Vs/cruise-site/_site && python -m http.server 4000
 # http://localhost:4000
 ```
 
+## 새 PC / 다른 장소에서 시작 시 체크리스트
+
+1. [ ] git pull (모든 프로젝트)
+2. [ ] Notion MCP 로그인 확인
+3. [ ] Python 설치 확인: `python --version`
+4. [ ] Node.js 설치 확인: `node --version`
+5. [ ] Ruby/Jekyll 설치 확인: `bundle --version`
+
 ## 저장소 구조
 
 | 역할 | 로컬 경로 | GitHub |
