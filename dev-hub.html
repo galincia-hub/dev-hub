@@ -129,7 +129,7 @@ a{text-decoration:none;color:inherit}
 <div class="sb">
   <div class="si" title="blog v1+v2 완성. Jane 스타일. KMS 자동저장 연동."><span class="sl">CruiseStudio</span><div class="pb"><div class="pf" style="width:80%;background:var(--blue)"></div></div><span class="pp" style="color:var(--blue)">80%</span></div>
   <div class="si" title="MCP 서버 3툴. 오세아니아/리젠트/포시즌스 문서. 실제 데이터 보강 필요."><span class="sl">CruiseKMS</span><div class="pb"><div class="pf" style="width:70%;background:var(--orange)"></div></div><span class="pp" style="color:var(--orange)">70%</span></div>
-  <div class="si" title="Type B 파싱 완성. 24개 상품. Streamlit 대시보드. Jekyll 연동 미완."><span class="sl">CruiseMD</span><div class="pb"><div class="pf" style="width:65%;background:var(--purple)"></div></div><span class="pp" style="color:var(--purple)">65%</span></div>
+  <div class="si" title="Type B 파싱 완성. 54개 항차. Streamlit 대시보드. 랜딩페이지 시스템 완성."><span class="sl">CruiseMD</span><div class="pb"><div class="pf" style="width:72%;background:var(--purple)"></div></div><span class="pp" style="color:var(--purple)">72%</span></div>
   <div class="si" title="React 목업 5개. Jekyll 구조. GitHub+Netlify 배포 완료. 실제 콘텐츠 미입력."><span class="sl">cruise.co.kr</span><div class="pb"><div class="pf" style="width:45%;background:var(--green)"></div></div><span class="pp" style="color:var(--green)">45%</span></div>
   <div class="si" title="5,589건 MD 고객데이터 보유. MCP 서버 미설치. 상담기능 개발 중."><span class="sl">CruiseCRM</span><div class="pb"><div class="pf" style="width:30%;background:var(--red)"></div></div><span class="pp" style="color:var(--red)">30%</span></div>
 </div>
@@ -241,11 +241,26 @@ a{text-decoration:none;color:inherit}
     <span class="cc">cd C:\Vs\CruiseMD\scripts &amp;&amp; python build_cards.py</span>
     <button class="cb" onclick="cp(this,'cd C:\\Vs\\CruiseMD\\scripts && python build_cards.py')">copy</button>
   </div>
+  <div class="cr">
+    <div class="cr-left"><span class="cl">프로모션 랜딩페이지 생성</span><span class="cl-note">오퍼 JSON → HTML 상세페이지 자동 생성<br>output/landing/{offer_id}_landing.html<br>--jekyll 플래그로 Jekyll front matter 추가</span></div>
+    <span class="cc">cd C:\Vs\CruiseMD &amp;&amp; python scripts/generate_landing.py --offer-id {offer_id} --open</span>
+    <button class="cb" onclick="cp(this,'cd C:\\Vs\\CruiseMD && python scripts/generate_landing.py --offer-id regent_B_20260228_235805 --open')">copy</button>
+  </div>
 </div>
 
 <!-- 작업 로그 -->
 <div class="lbl">&#x1F4DD; 주요 작업 이력</div>
 <div class="log-wrap">
+  <div class="log-row">
+    <span class="log-date">03-10</span>
+    <span class="log-sys" style="background:rgba(188,140,255,.12);color:var(--purple)">CruiseMD</span>
+    <div><div class="log-msg">프로모션 상세페이지 시스템 구축 — generate_landing.py + PRIZM 템플릿</div><div class="log-sub">Jinja2 렌더링 · Lucide CDN 아이콘 · Navy+Gold 디자인 · Jekyll front matter 분리 · 54개 세일링 자동 표시</div></div>
+  </div>
+  <div class="log-row">
+    <span class="log-date">03-10</span>
+    <span class="log-sys" style="background:rgba(188,140,255,.12);color:var(--purple)">CruiseMD</span>
+    <div><div class="log-msg">CLAUDE.md 프로모션 상세페이지 제작 규칙 섹션 추가</div><div class="log-sub">PRIZM 구조 정의 · AI틱 디자인 금지 규칙 7가지 · 컬러 팔레트 · CLI 명세</div></div>
+  </div>
   <div class="log-row">
     <span class="log-date">03-05</span>
     <span class="log-sys" style="background:rgba(88,166,255,.12);color:var(--blue)">Dev Hub</span>
@@ -296,7 +311,7 @@ a{text-decoration:none;color:inherit}
 <div class="footer">
   CI Dev Hub &nbsp;&middot;&nbsp; 크루즈인터내셔널 내부용 &nbsp;&middot;&nbsp; C:\Vs\dev-hub.html<br>
   <a href="results.html" style="color:var(--blue)">results.html</a> &nbsp;&middot;&nbsp;
-  <span style="color:var(--b)">마지막 업데이트: 2026-03-05</span>
+  <span style="color:var(--b)">마지막 업데이트: 2026-03-10</span>
 </div>
 
 </div>
