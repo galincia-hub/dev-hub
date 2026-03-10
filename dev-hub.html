@@ -131,7 +131,7 @@ a{text-decoration:none;color:inherit}
 <div class="sb">
   <div class="si" title="blog v1+v2 완성. Jane 스타일. KMS 자동저장 연동."><span class="sl">CruiseStudio</span><div class="pb"><div class="pf" style="width:80%;background:var(--blue)"></div></div><span class="pp" style="color:var(--blue)">80%</span></div>
   <div class="si" title="MCP 서버 3툴. 오세아니아/리젠트/포시즌스 문서. 실제 데이터 보강 필요."><span class="sl">CruiseKMS</span><div class="pb"><div class="pf" style="width:70%;background:var(--orange)"></div></div><span class="pp" style="color:var(--orange)">70%</span></div>
-  <div class="si" title="Type B 파싱 완성. 54개 항차. Streamlit 대시보드. 랜딩페이지 시스템 완성."><span class="sl">CruiseMD</span><div class="pb"><div class="pf" style="width:72%;background:var(--purple)"></div></div><span class="pp" style="color:var(--purple)">72%</span></div>
+  <div class="si" title="Type B 파싱 완성. 54개 항차. 랜딩페이지 시스템. Streamlit Cloud 배포 완료."><span class="sl">CruiseMD</span><div class="pb"><div class="pf" style="width:78%;background:var(--purple)"></div></div><span class="pp" style="color:var(--purple)">78%</span></div>
   <div class="si" title="React 목업 5개. Jekyll 구조. GitHub+Netlify 배포 완료. 실제 콘텐츠 미입력."><span class="sl">cruise.co.kr</span><div class="pb"><div class="pf" style="width:45%;background:var(--green)"></div></div><span class="pp" style="color:var(--green)">45%</span></div>
   <div class="si" title="5,589건 MD 고객데이터 보유. MCP 서버 미설치. 상담기능 개발 중."><span class="sl">CruiseCRM</span><div class="pb"><div class="pf" style="width:30%;background:var(--red)"></div></div><span class="pp" style="color:var(--red)">30%</span></div>
 </div>
@@ -160,6 +160,14 @@ a{text-decoration:none;color:inherit}
 <!-- 배포 서비스 -->
 <div class="lbl">&#x1F7E2; 배포된 서비스</div>
 <div class="grid">
+  <a href="https://cruisemd.streamlit.app" target="_blank" class="card" style="--cc:var(--purple);--cb:#1a0f2a">
+    <div class="card-hd"><div class="card-icon">&#128230;</div><div class="card-meta"><div class="dot dv"></div><span class="badge">라이브</span></div></div>
+    <div class="card-name">CruiseMD 상품관리 (클라우드)</div>
+    <div class="card-url">cruisemd.streamlit.app</div>
+    <div class="card-desc">Streamlit Cloud 배포 · 5탭: 대시보드 / 항차인덱스 / 프로모션관리 / 견적서생성 / 설정</div>
+    <div class="card-note">&#x2139; galincia-hub/CruiseMD main 브랜치 자동 반영</div>
+    <div class="tags"><span class="tag">Streamlit Cloud</span><span class="tag">54개 항차</span><span class="tag">라이브</span></div>
+  </a>
   <a href="https://radiant-croissant-b5e264.netlify.app" target="_blank" class="card" style="--cc:var(--green);--cb:#0f2a1a">
     <div class="card-hd"><div class="card-icon">&#127760;</div><div class="card-meta"><div class="dot dv"></div><span class="badge">라이브</span></div></div>
     <div class="card-name">cruise.co.kr (개발버전)</div>
@@ -254,6 +262,16 @@ a{text-decoration:none;color:inherit}
 <div class="lbl">&#x1F4DD; 주요 작업 이력</div>
 <div class="log-wrap">
   <div class="log-row">
+    <span class="log-date">03-10</span>
+    <span class="log-sys" style="background:rgba(188,140,255,.12);color:var(--purple)">CruiseMD</span>
+    <div><div class="log-msg">Streamlit Cloud 배포 완료 — cruisemd.streamlit.app</div><div class="log-sub">galincia-hub/CruiseMD 연동 · requirements.txt 추가 (streamlit/pandas/pdfplumber/jinja2) · GitHub 전체 push</div></div>
+  </div>
+  <div class="log-row">
+    <span class="log-date">03-10</span>
+    <span class="log-sys" style="background:rgba(88,166,255,.12);color:var(--blue)">Dev Hub</span>
+    <div><div class="log-msg">index.html 리다이렉트 추가 → galincia-hub.github.io/dev-hub/ 접속 가능</div><div class="log-sub">meta refresh + JS 이중 리다이렉트 · GitHub Pages push</div></div>
+  </div>
+  <div class="log-row">
     <span class="log-date">03-10 22:18</span>
     <span class="log-sys" style="background:rgba(188,140,255,.12);color:var(--purple)">CruiseMD</span>
     <div><div class="log-msg">프로모션 상세페이지 시스템 구축 — generate_landing.py + PRIZM 템플릿</div><div class="log-sub">Jinja2 렌더링 · Lucide CDN 아이콘 · Navy+Gold 디자인 · Jekyll front matter 분리 · 54개 세일링 자동 표시</div></div>
@@ -313,7 +331,7 @@ a{text-decoration:none;color:inherit}
 <div class="footer">
   CI Dev Hub &nbsp;&middot;&nbsp; 크루즈인터내셔널 내부용 &nbsp;&middot;&nbsp; C:\Vs\dev-hub.html<br>
   <a href="results.html" style="color:var(--blue)">results.html</a> &nbsp;&middot;&nbsp;
-  <span style="color:var(--b)">마지막 업데이트: 2026-03-10 22:30</span>
+  <span style="color:var(--b)">마지막 업데이트: 2026-03-10 (Streamlit Cloud 배포)</span>
 </div>
 
 </div>
